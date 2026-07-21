@@ -15,4 +15,5 @@ public class BookResponseDto {
     private Integer id;
     private String title;
     private Integer publishedYear;
+    private String authorName;
 }

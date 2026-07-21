@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class BookRequestDto {
     private String title;
     private Integer publishedYear;
+    private Integer authorId;
 }

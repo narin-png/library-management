@@ -1,7 +1,9 @@
 package dev.joint.library_management.service.impl;
 
+import dev.joint.library_management.config.EnhancedObjectMapper;
 import dev.joint.library_management.dto.MemberRequestDto;
 import dev.joint.library_management.dto.MemberResponseDto;
+import dev.joint.library_management.entity.Member;
 import dev.joint.library_management.repository.MemberRepository;
 import dev.joint.library_management.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -13,28 +15,39 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
+    private final EnhancedObjectMapper enhancedObjectMapper;
+
     @Override
     public List<MemberResponseDto> getAllMembers() {
-        return List.of();
+        return enhancedObjectMapper.convertList(memberRepository.findAll(), MemberResponseDto.class);
     }
 
     @Override
     public MemberResponseDto getMemberById(Integer id) {
-        return null;
+        return enhancedObjectMapper.convertValue(memberRepository.findById(id).orElseThrow(() -> new RuntimeException("Member not found with id: " + id)), MemberResponseDto.class);
     }
 
     @Override
     public MemberResponseDto createMember(MemberRequestDto memberRequestDto) {
-        return null;
+        return enhancedObjectMapper.convertValue(memberRepository.save(enhancedObjectMapper.convertValue(memberRequestDto, Member.class)), MemberResponseDto.class);
     }
 
     @Override
     public MemberResponseDto updateMember(Integer id, MemberRequestDto memberRequestDto) {
-        return null;
+        Member existingMember = memberRepository.findById(id).orElseThrow(() -> new RuntimeException("Member not found with id: " + id));
+        existingMember.setName(memberRequestDto.getName());
+        existingMember.setEmail(memberRequestDto.getEmail());
+        existingMember.setPhone(memberRequestDto.getPhone());
+        Member updatedMember = memberRepository.save(existingMember);
+        return enhancedObjectMapper.convertValue(updatedMember, MemberResponseDto.class);
     }
 
     @Override
     public void deleteMember(Integer id) {
-
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Member not found with id: " + id));
+        memberRepository.deleteById(id);
     }
 }
+
+
