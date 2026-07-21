@@ -5,6 +5,8 @@ import dev.joint.library_management.dto.MemberResponseDto;
 import dev.joint.library_management.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +19,8 @@ import java.util.List;
 public class MemberController {
     private final MemberService memberService;
     @GetMapping
-    public ResponseEntity<List<MemberResponseDto>> getAllMembers() {
-        List<MemberResponseDto> members = memberService.getAllMembers();
-        return ResponseEntity.ok(members);
+    public ResponseEntity<Page<MemberResponseDto>> getAllMembers(Pageable pageable) {
+        return ResponseEntity.ok(memberService.getAllMembers(pageable));
     }
 
     @GetMapping("/{id}")

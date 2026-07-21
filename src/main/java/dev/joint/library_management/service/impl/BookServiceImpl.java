@@ -9,6 +9,8 @@ import dev.joint.library_management.repository.AuthorRepository;
 import dev.joint.library_management.repository.BookRepository;
 import dev.joint.library_management.service.BookService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,19 +22,23 @@ public class BookServiceImpl implements BookService {
     private final EnhancedObjectMapper enhancedObjectMapper;
     private final AuthorRepository authorRepository;
     @Override
-    public List<BookResponseDto> getAllBooks() {
-        return bookRepository.findAll().stream().map(book -> {
-            BookResponseDto dto = new BookResponseDto();
-            dto.setId(book.getId());
-            dto.setTitle(book.getTitle());
-            dto.setPublishedYear(book.getPublishedYear());
+    public Page<BookResponseDto> getAllBooks(Pageable pageable) {
 
-            if (book.getAuthor() != null) {
-                dto.setAuthorName(book.getAuthor().getName());
-            }
+        return bookRepository.findAll(pageable)
+                .map(book -> {
 
-            return dto;
-        }).toList();
+                    BookResponseDto dto = new BookResponseDto();
+
+                    dto.setId(book.getId());
+                    dto.setTitle(book.getTitle());
+                    dto.setPublishedYear(book.getPublishedYear());
+
+                    if (book.getAuthor() != null) {
+                        dto.setAuthorName(book.getAuthor().getName());
+                    }
+
+                    return dto;
+                });
     }
 
     @Override

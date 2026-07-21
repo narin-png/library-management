@@ -7,6 +7,8 @@ import dev.joint.library_management.entity.Member;
 import dev.joint.library_management.repository.MemberRepository;
 import dev.joint.library_management.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,8 +20,9 @@ public class MemberServiceImpl implements MemberService {
     private final EnhancedObjectMapper enhancedObjectMapper;
 
     @Override
-    public List<MemberResponseDto> getAllMembers() {
-        return enhancedObjectMapper.convertList(memberRepository.findAll(), MemberResponseDto.class);
+    public Page<MemberResponseDto> getAllMembers(Pageable pageable) {
+        return memberRepository.findAll(pageable)
+                .map(member -> enhancedObjectMapper.convertValue(member, MemberResponseDto.class));
     }
 
     @Override

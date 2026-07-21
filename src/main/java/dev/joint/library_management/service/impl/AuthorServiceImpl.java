@@ -8,6 +8,8 @@ import dev.joint.library_management.repository.AuthorRepository;
 import dev.joint.library_management.repository.BookRepository;
 import dev.joint.library_management.service.AuthorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,8 +20,9 @@ public class AuthorServiceImpl implements AuthorService {
     private final AuthorRepository authorRepository;
     private final EnhancedObjectMapper enhancedObjectMapper;
     @Override
-    public List<AuthorResponseDto> getAllAuthors() {
-        return enhancedObjectMapper.convertList(authorRepository.findAll(), AuthorResponseDto.class);
+    public Page<AuthorResponseDto> getAllAuthors(Pageable pageable) {
+        return authorRepository.findAll(pageable)
+                .map(author -> enhancedObjectMapper.convertValue(author, AuthorResponseDto.class));
     }
 
     @Override
