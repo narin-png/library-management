@@ -3,6 +3,7 @@ package dev.joint.library_management.controller;
 import dev.joint.library_management.dto.MemberRequestDto;
 import dev.joint.library_management.dto.MemberResponseDto;
 import dev.joint.library_management.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +29,13 @@ public class MemberController {
     }
 
     @PostMapping
-    public ResponseEntity<MemberResponseDto> createMember(@RequestBody MemberRequestDto memberDto) {
+    public ResponseEntity<MemberResponseDto> createMember(@Valid @RequestBody MemberRequestDto memberDto) {
         MemberResponseDto createdMember = memberService.createMember(memberDto);
         return new ResponseEntity<>(createdMember, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MemberResponseDto> updateMember(@PathVariable Integer id, @RequestBody MemberRequestDto memberDto) {
+    public ResponseEntity<MemberResponseDto> updateMember(@PathVariable Integer id, @Valid @RequestBody MemberRequestDto memberDto) {
         MemberResponseDto updatedMember = memberService.updateMember(id, memberDto);
         return ResponseEntity.ok(updatedMember);
     }

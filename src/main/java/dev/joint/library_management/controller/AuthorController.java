@@ -3,6 +3,7 @@ package dev.joint.library_management.controller;
 import dev.joint.library_management.dto.AuthorRequestDto;
 import dev.joint.library_management.dto.AuthorResponseDto;
 import dev.joint.library_management.service.AuthorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +27,14 @@ public class AuthorController {
     }
 
     @PostMapping
-    public ResponseEntity<AuthorResponseDto> createAuthor(@RequestBody AuthorRequestDto authorRequestDto) {
+    public ResponseEntity<AuthorResponseDto> createAuthor(@Valid @RequestBody AuthorRequestDto authorRequestDto) {
         AuthorResponseDto createdAuthor = authorService.createAuthor(authorRequestDto);
         return new ResponseEntity<>(createdAuthor, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<AuthorResponseDto> updateAuthor(@PathVariable Integer id,
-                                                          @RequestBody AuthorRequestDto authorRequestDto) {
+                                                          @Valid @RequestBody AuthorRequestDto authorRequestDto) {
         return ResponseEntity.ok(authorService.updateAuthor(id, authorRequestDto));
     }
 
