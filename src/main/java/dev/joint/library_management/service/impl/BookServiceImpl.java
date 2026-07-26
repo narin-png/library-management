@@ -85,12 +85,15 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
 
-        Author author = authorRepository.findById(request.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Author not found"));
-
         book.setTitle(request.getTitle());
         book.setPublishedYear(request.getPublishedYear());
-        book.setAuthor(author);
+
+        if (!book.getAuthor().getId().equals(request.getAuthorId())) {
+            Author author = authorRepository.findById(request.getAuthorId())
+                    .orElseThrow(() -> new RuntimeException("Author not found"));
+
+            book.setAuthor(author);
+        }
 
         Book updated = bookRepository.save(book);
 
