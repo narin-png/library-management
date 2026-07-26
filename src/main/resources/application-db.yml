@@ -5,4 +5,4 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/library_management
     username: postgres
-    password: 2005
+    password: ${DB_PASSWORD}

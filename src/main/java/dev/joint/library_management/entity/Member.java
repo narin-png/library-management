@@ -1,12 +1,10 @@
 package dev.joint.library_management.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Table(name = "members")
 @Entity
 @AllArgsConstructor
