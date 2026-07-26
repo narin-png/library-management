@@ -4,6 +4,7 @@ import dev.joint.library_management.config.EnhancedObjectMapper;
 import dev.joint.library_management.dto.AuthorRequestDto;
 import dev.joint.library_management.dto.AuthorResponseDto;
 import dev.joint.library_management.entity.Author;
+import dev.joint.library_management.exception.ResourceNotFoundException;
 import dev.joint.library_management.repository.AuthorRepository;
 import dev.joint.library_management.repository.BookRepository;
 import dev.joint.library_management.service.AuthorService;
@@ -31,7 +32,7 @@ public class AuthorServiceImpl implements AuthorService {
     public AuthorResponseDto getAuthorById(Integer id) {
         return enhancedObjectMapper.convertValue(
                 authorRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Author not found with id: " + id)),
+                        .orElseThrow(() -> new ResourceNotFoundException("Author not found")),
                 AuthorResponseDto.class);
     }
 
@@ -45,7 +46,7 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public AuthorResponseDto updateAuthor(Integer id, AuthorRequestDto authorRequestDto) {
         Author existingAuthor = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
 
         existingAuthor.setName(authorRequestDto.getName());
         existingAuthor.setEmail(authorRequestDto.getEmail());
@@ -58,7 +59,7 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public void deleteAuthor(Integer id) {
         Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
 
         authorRepository.delete(author);
     }

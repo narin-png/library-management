@@ -5,6 +5,7 @@ import dev.joint.library_management.dto.BookRequestDto;
 import dev.joint.library_management.dto.BookResponseDto;
 import dev.joint.library_management.entity.Author;
 import dev.joint.library_management.entity.Book;
+import dev.joint.library_management.exception.ResourceNotFoundException;
 import dev.joint.library_management.repository.AuthorRepository;
 import dev.joint.library_management.repository.BookRepository;
 import dev.joint.library_management.service.BookService;
@@ -46,7 +47,7 @@ public class BookServiceImpl implements BookService {
 
 
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
 
         BookResponseDto dto =
                 enhancedObjectMapper.convertValue(book, BookResponseDto.class);
@@ -62,7 +63,7 @@ public class BookServiceImpl implements BookService {
     public BookResponseDto createBook(BookRequestDto request) {
 
         Author author = authorRepository.findById(request.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
 
         Book book = new Book();
         book.setTitle(request.getTitle());
@@ -83,14 +84,14 @@ public class BookServiceImpl implements BookService {
     public BookResponseDto updateBook(Integer id, BookRequestDto request) {
 
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
 
         book.setTitle(request.getTitle());
         book.setPublishedYear(request.getPublishedYear());
 
         if (!book.getAuthor().getId().equals(request.getAuthorId())) {
             Author author = authorRepository.findById(request.getAuthorId())
-                    .orElseThrow(() -> new RuntimeException("Author not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
 
             book.setAuthor(author);
         }
@@ -109,7 +110,7 @@ public class BookServiceImpl implements BookService {
     public void deleteBook(Integer id) {
 
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
 
         bookRepository.delete(book);
     }
