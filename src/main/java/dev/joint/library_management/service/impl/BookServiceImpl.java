@@ -12,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final EnhancedObjectMapper enhancedObjectMapper;
@@ -24,14 +26,12 @@ public class BookServiceImpl implements BookService {
     @Override
     public Page<BookResponseDto> getAllBooks(Pageable pageable) {
 
+
         return bookRepository.findAll(pageable)
                 .map(book -> {
 
-                    BookResponseDto dto = new BookResponseDto();
-
-                    dto.setId(book.getId());
-                    dto.setTitle(book.getTitle());
-                    dto.setPublishedYear(book.getPublishedYear());
+                    BookResponseDto dto =
+                            enhancedObjectMapper.convertValue(book, BookResponseDto.class);
 
                     if (book.getAuthor() != null) {
                         dto.setAuthorName(book.getAuthor().getName());
@@ -44,13 +44,12 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookResponseDto getBookById(Integer id) {
 
+
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
 
-        BookResponseDto dto = new BookResponseDto();
-        dto.setId(book.getId());
-        dto.setTitle(book.getTitle());
-        dto.setPublishedYear(book.getPublishedYear());
+        BookResponseDto dto =
+                enhancedObjectMapper.convertValue(book, BookResponseDto.class);
 
         if (book.getAuthor() != null) {
             dto.setAuthorName(book.getAuthor().getName());
@@ -72,10 +71,9 @@ public class BookServiceImpl implements BookService {
 
         Book saved = bookRepository.save(book);
 
-        BookResponseDto dto = new BookResponseDto();
-        dto.setId(saved.getId());
-        dto.setTitle(saved.getTitle());
-        dto.setPublishedYear(saved.getPublishedYear());
+        BookResponseDto dto =
+                enhancedObjectMapper.convertValue(saved, BookResponseDto.class);
+
         dto.setAuthorName(saved.getAuthor().getName());
 
         return dto;
@@ -96,10 +94,9 @@ public class BookServiceImpl implements BookService {
 
         Book updated = bookRepository.save(book);
 
-        BookResponseDto dto = new BookResponseDto();
-        dto.setId(updated.getId());
-        dto.setTitle(updated.getTitle());
-        dto.setPublishedYear(updated.getPublishedYear());
+        BookResponseDto dto =
+                enhancedObjectMapper.convertValue(updated, BookResponseDto.class);
+
         dto.setAuthorName(updated.getAuthor().getName());
 
         return dto;
