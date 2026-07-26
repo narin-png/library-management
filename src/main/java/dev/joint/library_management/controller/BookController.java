@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,8 @@ import java.util.List;
 public class BookController {
     private final BookService bookService;
     @GetMapping
-    public ResponseEntity<Page<BookResponseDto>> getAllBooks(Pageable pageable) {
+    public ResponseEntity<Page<BookResponseDto>> getAllBooks(
+            @PageableDefault(size = 10, page = 0) Pageable pageable) {
         return ResponseEntity.ok(bookService.getAllBooks(pageable));
     }
 
