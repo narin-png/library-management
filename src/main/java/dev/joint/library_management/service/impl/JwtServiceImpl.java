@@ -44,6 +44,7 @@ public class JwtServiceImpl implements JwtService {
                 .and()
                 .signWith(getSignKey()).compact();
     }
+
     public Key getSignKey() {
         byte[] keyBytes =key.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
