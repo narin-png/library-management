@@ -1,5 +1,7 @@
 package dev.joint.library_management.controller;
 
+import dev.joint.library_management.dto.security.JwtResponseDto;
+import dev.joint.library_management.dto.security.LoginRequestDto;
 import dev.joint.library_management.dto.security.RegisterRequestDto;
 import dev.joint.library_management.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,5 +26,12 @@ public class AuthController {
         userService.register(request);
 
         return ResponseEntity.ok("User registered successfully");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponseDto> login(
+            @RequestBody LoginRequestDto request) {
+
+        return ResponseEntity.ok(userService.login(request));
     }
 }
