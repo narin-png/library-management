@@ -4,6 +4,7 @@ import dev.joint.library_management.config.EnhancedObjectMapper;
 import dev.joint.library_management.dto.security.UserDto;
 import dev.joint.library_management.entity.security.User;
 import dev.joint.library_management.models.UserRequest;
+import dev.joint.library_management.repository.security.AuthorityRepository;
 import dev.joint.library_management.repository.security.UserRepository;
 import dev.joint.library_management.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EnhancedObjectMapper mapper;
+    private final AuthorityRepository authorityRepository;
 
     @Override
     public List<UserDto> getUsers() {

@@ -3,11 +3,13 @@ package dev.joint.library_management.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,21 +25,46 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/auth/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter,
-                        UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(Customizer.withDefaults());
+        http.
+                csrf(AbstractHttpConfigurer::disable)
+
+                . authorizeHttpRequests(auth->auth.requestMatchers("/public/**", "/auth/**", "/swagger-ui/**","/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/medias").permitAll()
+                        // USER və ADMIN oxuya bilər
+                        .requestMatchers(HttpMethod.GET,
+                                "/books/**",
+                                "/authors/**",
+                                "/members/**")
+                        .hasAnyRole("USER", "ADMIN")
+
+                        // Yalnız ADMIN yarada bilər
+                        .requestMatchers(HttpMethod.POST,
+                                "/books/**",
+                                "/authors/**",
+                                "/members/**")
+                        .hasRole("ADMIN")
+
+                        // Yalnız ADMIN yeniləyə bilər
+                        .requestMatchers(HttpMethod.PUT,
+                                "/books/**",
+                                "/authors/**",
+                                "/members/**")
+                        .hasRole("ADMIN")
+
+                        // Yalnız ADMIN silə bilər
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/books/**",
+                                "/authors/**",
+                                "/members/**")
+                        .hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .formLogin(AbstractHttpConfigurer::disable)
+                //.formLogin(Customizer.withDefaults())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        // http.apply(jwtFilterConfigurerAdapter);
+
 
         return http.build();
     }
