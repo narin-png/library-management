@@ -20,4 +20,5 @@ public interface UserService extends UserDetailsService  {
 
     UserDto updateUser(Integer id, UserDto userDto);
     UserRequest updateUser(Integer id, UserRequest userRequest);
+    void register(RegisterRequestDto request);
 }

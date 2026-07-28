@@ -1,7 +1,9 @@
 package dev.joint.library_management.service.impl;
 
 import dev.joint.library_management.config.EnhancedObjectMapper;
+import dev.joint.library_management.dto.security.RegisterRequestDto;
 import dev.joint.library_management.dto.security.UserDto;
+import dev.joint.library_management.entity.security.Authority;
 import dev.joint.library_management.entity.security.User;
 import dev.joint.library_management.models.UserRequest;
 import dev.joint.library_management.repository.security.AuthorityRepository;
@@ -76,7 +78,24 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
     }
+    @Override
+    public void register(RegisterRequestDto request) {
 
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        Authority authority = authorityRepository
+                .findByAuthority("ROLE_USER")
+                .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setAuthorities(List.of(authority));
+
+        userRepository.save(user);
+    }
 
 }
 

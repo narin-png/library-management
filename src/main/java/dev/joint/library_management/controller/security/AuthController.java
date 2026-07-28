@@ -1,9 +1,11 @@
 package dev.joint.library_management.controller.security;
 
 import dev.joint.library_management.config.JwtFilter;
+import dev.joint.library_management.dto.security.RegisterRequestDto;
 import dev.joint.library_management.models.SignInRequest;
 import dev.joint.library_management.models.SignInResponse;
 import dev.joint.library_management.service.AuthService;
+import dev.joint.library_management.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Auth", description = "Security management APIs")
 public class AuthController {
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/sign-in")
     public ResponseEntity<SignInResponse> token(@RequestBody SignInRequest signInRequest){
@@ -43,5 +46,13 @@ public class AuthController {
         authService.setCookies(headers, signInResponse);
         return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
 
+    }
+    @PostMapping("/register")
+    public ResponseEntity<String> register(
+            @RequestBody RegisterRequestDto request) {
+
+        userService.register(request);
+
+        return ResponseEntity.ok("User registered successfully");
     }
 }
