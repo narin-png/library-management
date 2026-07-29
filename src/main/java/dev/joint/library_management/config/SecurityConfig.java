@@ -1,0 +1,92 @@
+package dev.joint.library_management.config;
+
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
+@RequiredArgsConstructor
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+    private final JwtFilter jwtFilter;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http.
+                csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Authentication required\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write("{\"error\": \"Forbidden\", \"message\": \"You don't have permission\"}");
+                        })
+                )
+                . authorizeHttpRequests(auth->auth.requestMatchers("/public/**", "/auth/**", "/swagger-ui/**","/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/medias").permitAll()
+                        // USER və ADMIN oxuya bilər
+                        .requestMatchers(HttpMethod.GET,
+                                "/books/**",
+                                "/authors/**",
+                                "/members/**")
+                        .hasAnyRole("USER", "ADMIN")
+
+                        // Yalnız ADMIN yarada bilər
+                        .requestMatchers(HttpMethod.POST,
+                                "/books/**",
+                                "/authors/**",
+                                "/members/**")
+                        .hasRole("ADMIN")
+
+                        // Yalnız ADMIN yeniləyə bilər
+                        .requestMatchers(HttpMethod.PUT,
+                                "/books/**",
+                                "/authors/**",
+                                "/members/**")
+                        .hasRole("ADMIN")
+
+                        // Yalnız ADMIN silə bilər
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/books/**",
+                                "/authors/**",
+                                "/members/**")
+                        .hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .formLogin(AbstractHttpConfigurer::disable)
+                //.formLogin(Customizer.withDefaults())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        // http.apply(jwtFilterConfigurerAdapter);
+
+
+        return http.build();
+    }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+}
