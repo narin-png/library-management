@@ -89,7 +89,7 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(
 
-                "Invalid username or password",
+                ex.getMessage(),
 
                 HttpStatus.UNAUTHORIZED
 
