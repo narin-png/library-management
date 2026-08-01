@@ -6,6 +6,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,4 +17,7 @@ public class BookResponseDto {
     private String title;
     private Integer publishedYear;
     private String authorName;
+    private Integer totalCopies;
+    private Integer availableCopies;
+    private Set<String> categoryNames;
 }

@@ -25,52 +25,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http.
                 csrf(AbstractHttpConfigurer::disable)
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setContentType("application/json");
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Authentication required\"}");
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setContentType("application/json");
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.getWriter().write("{\"error\": \"Forbidden\", \"message\": \"You don't have permission\"}");
-                        })
-                )
+
                 . authorizeHttpRequests(auth->auth.requestMatchers("/public/**", "/auth/**", "/swagger-ui/**","/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/medias").permitAll()
-                        // USER və ADMIN oxuya bilər
-                        .requestMatchers(HttpMethod.GET,
-                                "/books/**",
-                                "/authors/**",
-                                "/members/**")
-                        .hasAnyRole("USER", "ADMIN")
-
-                        // Yalnız ADMIN yarada bilər
-                        .requestMatchers(HttpMethod.POST,
-                                "/books/**",
-                                "/authors/**",
-                                "/members/**")
-                        .hasRole("ADMIN")
-
-                        // Yalnız ADMIN yeniləyə bilər
-                        .requestMatchers(HttpMethod.PUT,
-                                "/books/**",
-                                "/authors/**",
-                                "/members/**")
-                        .hasRole("ADMIN")
-
-                        // Yalnız ADMIN silə bilər
-                        .requestMatchers(HttpMethod.DELETE,
-                                "/books/**",
-                                "/authors/**",
-                                "/members/**")
-                        .hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
                 //.formLogin(Customizer.withDefaults())
