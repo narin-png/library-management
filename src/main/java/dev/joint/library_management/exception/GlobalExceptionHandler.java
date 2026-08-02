@@ -96,4 +96,8 @@ public class GlobalExceptionHandler {
         );
 
     }
+    @ExceptionHandler(BookNotAvailableException.class)
+    public ResponseEntity<String> handleBookNotAvailable(BookNotAvailableException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
 }
