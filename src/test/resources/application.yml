@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: library-management
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  security:
+    jwt:
+      key: dGVzdC1vbmx5LXNlY3JldC1rZXktZm9yLWp1bml0LXRlc3RzLW5vdC1mb3ItcHJvZHVjdGlvbi11c2Ugb25seQ==
+      access-expire-time: 30000000
+      refresh-expire-time: 3600000
