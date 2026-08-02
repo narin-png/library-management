@@ -3,6 +3,7 @@ package dev.joint.library_management.service.impl;
 import dev.joint.library_management.config.EnhancedObjectMapper;
 import dev.joint.library_management.dto.BookRequestDto;
 import dev.joint.library_management.dto.BookResponseDto;
+import dev.joint.library_management.dto.CategoryBookCountDto;
 import dev.joint.library_management.entity.Author;
 import dev.joint.library_management.entity.Book;
 import dev.joint.library_management.entity.Category;
@@ -11,16 +12,20 @@ import dev.joint.library_management.repository.AuthorRepository;
 import dev.joint.library_management.repository.BookRepository;
 import dev.joint.library_management.repository.CategoryRepository;
 import dev.joint.library_management.service.BookService;
+import dev.joint.library_management.specification.BookSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -108,6 +113,40 @@ public class BookServiceImpl implements BookService {
         }
 
         return categories;
+    }
+
+    @Override
+    public List<BookResponseDto> getBooksByCategory(String categoryName) {
+        return bookRepository.findByCategoryName(categoryName).stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CategoryBookCountDto> getCategoryBookCounts() {
+        return bookRepository.countBooksPerCategoryNative().stream()
+                .map(row -> new CategoryBookCountDto((String) row[0], ((Number) row[1]).longValue()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<BookResponseDto> searchBooks(String title, String authorName, String categoryName,
+                                             Integer fromYear, Integer toYear, Boolean available,
+                                             Pageable pageable) {
+
+        List<Specification<Book>> filters = Stream.of(
+                BookSpecification.hasTitleLike(title),
+                BookSpecification.hasAuthorNameLike(authorName),
+                BookSpecification.hasCategoryName(categoryName),
+                BookSpecification.publishedFromYear(fromYear),
+                BookSpecification.publishedToYear(toYear),
+                BookSpecification.isAvailable(available)
+        ).filter(Objects::nonNull).collect(Collectors.toList());
+
+        Specification<Book> spec = filters.isEmpty() ? null : Specification.allOf(filters);
+
+        return bookRepository.findAll(spec, pageable)
+                .map(this::toResponseDto);
     }
 
     private BookResponseDto toResponseDto(Book book) {

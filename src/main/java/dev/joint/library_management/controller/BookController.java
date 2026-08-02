@@ -2,6 +2,7 @@ package dev.joint.library_management.controller;
 
 import dev.joint.library_management.dto.BookRequestDto;
 import dev.joint.library_management.dto.BookResponseDto;
+import dev.joint.library_management.dto.CategoryBookCountDto;
 import dev.joint.library_management.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,5 +54,31 @@ public class BookController {
     public ResponseEntity<Void> deleteBook(@PathVariable Integer id) {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/category/{categoryName}")
+    @Operation(summary = "Get books by category name (JPQL join query)")
+    public ResponseEntity<List<BookResponseDto>> getBooksByCategory(@PathVariable String categoryName) {
+        return ResponseEntity.ok(bookService.getBooksByCategory(categoryName));
+    }
+
+    @GetMapping("/stats/categories")
+    @Operation(summary = "Get book count per category (native SQL query)")
+    public ResponseEntity<List<CategoryBookCountDto>> getCategoryBookCounts() {
+        return ResponseEntity.ok(bookService.getCategoryBookCounts());
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Dynamic book search with optional filters")
+    public ResponseEntity<Page<BookResponseDto>> searchBooks(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String authorName,
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(required = false) Integer fromYear,
+            @RequestParam(required = false) Integer toYear,
+            @RequestParam(required = false) Boolean available,
+            @PageableDefault(size = 10, page = 0) Pageable pageable) {
+
+        return ResponseEntity.ok(
+                bookService.searchBooks(title, authorName, categoryName, fromYear, toYear, available, pageable));
     }
 }

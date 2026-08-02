@@ -1,9 +1,6 @@
 package dev.joint.library_management.service;
 
-import dev.joint.library_management.dto.AuthorRequestDto;
-import dev.joint.library_management.dto.AuthorResponseDto;
-import dev.joint.library_management.dto.BookRequestDto;
-import dev.joint.library_management.dto.BookResponseDto;
+import dev.joint.library_management.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,4 +13,9 @@ public interface BookService {
     BookResponseDto createBook(BookRequestDto bookRequestDto);
     BookResponseDto updateBook(Integer id, BookRequestDto bookRequestDto);
     void deleteBook(Integer id);
+    List<BookResponseDto> getBooksByCategory(String categoryName);
+    List<CategoryBookCountDto> getCategoryBookCounts();
+    Page<BookResponseDto> searchBooks(String title, String authorName, String categoryName,
+                                   Integer fromYear, Integer toYear, Boolean available,
+                                   Pageable pageable);
 }
