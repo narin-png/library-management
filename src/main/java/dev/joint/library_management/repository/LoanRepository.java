@@ -2,12 +2,14 @@ package dev.joint.library_management.repository;
 
 import dev.joint.library_management.entity.Loan;
 import dev.joint.library_management.enums.LoanStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface LoanRepository extends JpaRepository<Loan, Integer> {
     List<Loan> findByMemberId(Integer memberId);
@@ -27,4 +29,12 @@ public interface LoanRepository extends JpaRepository<Loan, Integer> {
             "group by m.id, m.name " +
             "order by activeLoans desc", nativeQuery = true)
     List<Object[]> countActiveLoansPerMemberNative();
+
+    @EntityGraph(attributePaths = {"member", "items", "items.book"})
+    @Query("select l from Loan l where l.id = :id")
+    Optional<Loan> findWithDetailsById(@Param("id") Integer id);
+
+    @EntityGraph(attributePaths = {"member", "items", "items.book"})
+    @Query("select l from Loan l where l.id in :ids")
+    List<Loan> findAllWithDetailsByIdIn(@Param("ids") List<Integer> ids);
 }

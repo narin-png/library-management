@@ -17,12 +17,14 @@ import dev.joint.library_management.repository.MemberRepository;
 import dev.joint.library_management.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,7 +94,7 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public LoanResponseDto getLoanById(Integer id) {
-        Loan loan = loanRepository.findById(id)
+        Loan loan = loanRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan not found"));
 
         return toResponseDto(loan);
@@ -100,8 +102,23 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public Page<LoanResponseDto> getAllLoans(Pageable pageable) {
-        return loanRepository.findAll(pageable)
-                .map(this::toResponseDto);
+
+        Page<Loan> loanPage = loanRepository.findAll(pageable);
+
+        List<Integer> ids = loanPage.getContent().stream()
+                .map(Loan::getId)
+                .collect(Collectors.toList());
+        List<Loan> loansWithDetails = loanRepository.findAllWithDetailsByIdIn(ids);
+
+
+        Map<Integer, Loan> loanById = loansWithDetails.stream()
+                .collect(Collectors.toMap(Loan::getId, loan -> loan));
+
+        List<LoanResponseDto> dtos = ids.stream()
+                .map(id -> toResponseDto(loanById.get(id)))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(dtos, pageable, loanPage.getTotalElements());
     }
 
     private LoanResponseDto toResponseDto(Loan loan) {
