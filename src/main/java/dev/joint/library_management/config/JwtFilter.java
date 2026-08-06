@@ -2,6 +2,7 @@ package dev.joint.library_management.config;
 
 import dev.joint.library_management.service.JwtService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -28,19 +29,28 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     public static final String ACCESS_TOKEN = "access-token";
     public static final String REFRESH_TOKEN = "refresh-token";
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//        Optional<String> token=Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION));
-//        if(token.isPresent())
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
         Cookie[] cookies = request.getCookies();
-        if(cookies != null) {
-            Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(ACCESS_TOKEN)).findFirst().ifPresent(cookie ->
-            {
-                Claims claims = jwtService.parseToken(cookie.getValue());
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(claims.getSubject(), null, getAuthorities(claims));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            });
+        if (cookies != null) {
+            Arrays.stream(cookies)
+                    .filter(cookie -> cookie.getName().equals(ACCESS_TOKEN))
+                    .findFirst()
+                    .ifPresent(cookie -> {
+                        try {
+                            Claims claims = jwtService.parseToken(cookie.getValue());
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(claims.getSubject(), null, getAuthorities(claims));
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                        } catch (JwtException e) {
+                            // expired, malformed, bad signature, etc. - just don't authenticate;
+                            // protected endpoints will correctly 401 via the entry point.
+                            SecurityContextHolder.clearContext();
+                        }
+                    });
         }
         filterChain.doFilter(request, response);
     }
