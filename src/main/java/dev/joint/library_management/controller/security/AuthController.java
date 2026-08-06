@@ -39,14 +39,15 @@ public class AuthController {
         return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
     }
 
+
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refresh-token") String refreshToken) {
         SignInResponse signInResponse = authService.refreshCookie(refreshToken);
         HttpHeaders headers = new HttpHeaders();
         authService.setCookies(headers, signInResponse);
-        return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
-
+        return new ResponseEntity<>(headers, HttpStatus.OK);
     }
+
     @PostMapping("/register")
     public ResponseEntity<String> register(
             @RequestBody RegisterRequestDto request) {

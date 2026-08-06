@@ -42,6 +42,8 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private JwtService jwtService;
     private final UserService userService;
+    @Value("${app.cookie.secure}")
+    private boolean cookieSecure;
 
     @Override
     public SignInResponse signIn(SignInRequest signInRequest) {
@@ -63,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
         ResponseCookie accessCookie=ResponseCookie.from(JwtFilter.ACCESS_TOKEN,signInResponse.getAccessToken().getToken())
                 .maxAge(accessExpireTime)
                 .path("/")
-                .secure(false)
+                .secure(cookieSecure)
                 .httpOnly(true)
                 .sameSite("LAX") //LAX, STRICT , NONE
                 .build();
@@ -71,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
         ResponseCookie refreshCookie=ResponseCookie.from(JwtFilter.REFRESH_TOKEN,signInResponse.getRefreshToken().getToken())
                 .maxAge(accessExpireTime)
                 .path("/")
-                .secure(false)
+                .secure(cookieSecure)
                 .httpOnly(true)
                 .sameSite("LAX") //LAX, STRICT , NONE
                 .build();
@@ -82,7 +84,7 @@ public class AuthServiceImpl implements AuthService {
         ResponseCookie accessCookie=ResponseCookie.from(JwtFilter.ACCESS_TOKEN,"")
                 .maxAge(0)
                 .path("/")
-                .secure(false)
+                .secure(cookieSecure)
                 .httpOnly(true)
                 .sameSite("LAX") //LAX, STRICT , NONE
                 .build();
@@ -90,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
         ResponseCookie refreshCookie=ResponseCookie.from(JwtFilter.REFRESH_TOKEN,"")
                 .maxAge(0)
                 .path("/")
-                .secure(false)
+                .secure(cookieSecure)
                 .httpOnly(true)
                 .sameSite("LAX") //LAX, STRICT , NONE
                 .build();

@@ -7,12 +7,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -20,10 +22,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-@Configuration
+@Component
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
     public static final String ACCESS_TOKEN = "access-token";
     public static final String REFRESH_TOKEN = "refresh-token";
     @Override
@@ -35,8 +37,8 @@ public class JwtFilter extends OncePerRequestFilter {
             Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(ACCESS_TOKEN)).findFirst().ifPresent(cookie ->
             {
                 Claims claims = jwtService.parseToken(cookie.getValue());
-                System.out.println("claims" + claims);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(claims.get("principal"), null, getAuthorities(claims));
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(claims.getSubject(), null, getAuthorities(claims));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             });
         }
@@ -44,7 +46,10 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(Claims claims) {
-        List<String> roles=claims.get("authorities", List.class);
-        return roles.stream().map(SimpleGrantedAuthority::new).toList();
+        Object raw = claims.get("authorities");
+        return ((List<?>) raw).stream()
+                .map(String::valueOf)
+                .map(SimpleGrantedAuthority::new)
+                .toList();
     }
 }

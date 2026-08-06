@@ -30,17 +30,19 @@ public class JwtServiceImpl implements JwtService {
         return (Claims) Jwts.parser().verifyWith((SecretKey) getSignKey() ).build().parse(token).getPayload();
     }
 
+
     @Override
     public String issueToken(Authentication authentication) {
         return Jwts.builder().header()
                 .add("typ", "JWT")
                 .add("alg", "HS256")
                 .and().claims()
-                .subject(authentication.getName())
-                .add("principal", authentication.getPrincipal())
-                .add("authorities", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .subject(authentication.getName())  // username only
+                .add("authorities", authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList()))
                 .issuedAt(new Date())
-                .expiration(new Date (new Date().getTime() + expireTime))
+                .expiration(new Date(new Date().getTime() + expireTime))
                 .and()
                 .signWith(getSignKey()).compact();
     }
